@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heun's Method</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .example-btn {
+            background-color: var(--secondary);
+            border: 2px solid var(--accent);
+            color: var(--accent);
+            font-size: 1rem;
+            font-weight: bold;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .example-btn:hover, .example-btn.active {
+            background-color: var(--accent);
+            color: white;
+        }
+        .examples-header {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+        }
+        .example-content {
+            display: none;
+        }
+        .example-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <header class="header">
+        <h1>Heun's Method</h1>
+        <p>(Improved Euler Method)</p>
+    </header>
+
+    <!-- Mathematical Background -->
+    <section class="card">
+        <h2><i data-lucide="book-open"></i> Mathematical Background</h2>
+        <p>Given an initial value problem:</p>
+        <div class="formula">\[ \frac{dy}{dx} = f(x, y), \quad y(x_0) = y_0 \]</div>
+        <p>Euler's method uses a single slope at the left endpoint. Heun's method improves accuracy by averaging two slopes.</p>
+        <div class="inner-card">
+            <p><strong>Predictor:</strong></p>
+            \[ \tilde{y}_{i+1} = y_i + h \cdot f(x_i, y_i) \]
+            <p><strong>Corrector:</strong></p>
+            \[ y_{i+1} = y_i + \frac{h}{2} \left[ f(x_i, y_i) + f(x_{i+1}, \tilde{y}_{i+1}) \right] \]
+        </div>
+        <p>Heun's Method is a second-order Runge-Kutta Method.</p>
+    </section>
+
+    <!-- Example Buttons (inline content) -->
+    <div class="examples-header">
+        <button class="example-btn" data-example="1">
+            <i data-lucide="play"></i> Example 1: dy/dx = x + y
+        </button>
+        <button class="example-btn" data-example="2">
+            <i data-lucide="play"></i> Example 2: dy/dx = -2xy
+        </button>
+    </div>
+
+    <!-- Example 1 Content (hidden by default) -->
+    <div id="example-1" class="example-content">
+        <section class="card">
+            <h2><i data-lucide="pen-tool"></i> Example 1: dy/dx = x + y</h2>
+            <div class="inner-card">
+                Solve \[ \frac{dy}{dx} = x + y \] with \( y(0)=1 \) using \( h=0.1 \). Find \( y(0.2) \).
+            </div>
+
+            <div class="step-card">
+                <h3>Step 1: \( x_0 = 0 \to x_1 = 0.1 \)</h3>
+                <p>\( f(0,1) = 0 + 1 = 1 \)</p>
+                <p>Predictor: \( \tilde{y}_1 = 1 + 0.1 \cdot 1 = 1.1 \)</p>
+                <p>\( f(0.1, 1.1) = 0.1 + 1.1 = 1.2 \)</p>
+                <p>Corrector: \( y_1 = 1 + \frac{0.1}{2}(1 + 1.2) = 1 + 0.05 \cdot 2.2 = 1.11 \)</p>
+            </div>
+
+            <div class="step-card">
+                <h3>Step 2: \( x_1 = 0.1 \to x_2 = 0.2 \)</h3>
+                <p>\( f(0.1, 1.11) = 0.1 + 1.11 = 1.21 \)</p>
+                <p>Predictor: \( \tilde{y}_2 = 1.11 + 0.1 \cdot 1.21 = 1.231 \)</p>
+                <p>\( f(0.2, 1.231) = 0.2 + 1.231 = 1.431 \)</p>
+                <p>Corrector: \( y_2 = 1.11 + \frac{0.1}{2}(1.21 + 1.431) = 1.11 + 0.05 \cdot 2.641 = 1.24205 \)</p>
+            </div>
+
+            <div class="result">
+                <p><strong>Result:</strong> \( y(0.2) \approx 1.24205 \)</p>
+                <p class="text-sm">Exact solution: \( y = 2e^x - x - 1 \) → \( y(0.2) \approx 1.24214 \). Error ≈ 0.00009.</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- Example 2 Content (hidden by default) -->
+    <div id="example-2" class="example-content">
+        <section class="card">
+            <h2><i data-lucide="pen-tool"></i> Example 2: dy/dx = -2xy</h2>
+            <div class="inner-card">
+                Solve \[ \frac{dy}{dx} = -2xy \] with \( y(0)=1 \) using \( h=0.2 \). Find \( y(0.4) \).
+            </div>
+
+            <div class="step-card">
+                <h3>Step 1: \( x_0 = 0 \to x_1 = 0.2 \)</h3>
+                <p>\( f(0,1) = -2 \cdot 0 \cdot 1 = 0 \)</p>
+                <p>Predictor: \( \tilde{y}_1 = 1 + 0.2 \cdot 0 = 1.0 \)</p>
+                <p>\( f(0.2, 1.0) = -2 \cdot 0.2 \cdot 1.0 = -0.4 \)</p>
+                <p>Corrector: \( y_1 = 1 + \frac{0.2}{2}(0 + (-0.4)) = 1 + 0.1 \cdot (-0.4) = 0.96 \)</p>
+            </div>
+
+            <div class="step-card">
+                <h3>Step 2: \( x_1 = 0.2 \to x_2 = 0.4 \)</h3>
+                <p>\( f(0.2, 0.96) = -2 \cdot 0.2 \cdot 0.96 = -0.384 \)</p>
+                <p>Predictor: \( \tilde{y}_2 = 0.96 + 0.2 \cdot (-0.384) = 0.8832 \)</p>
+                <p>\( f(0.4, 0.8832) = -2 \cdot 0.4 \cdot 0.8832 = -0.70656 \)</p>
+                <p>Corrector: \( y_2 = 0.96 + \frac{0.2}{2}(-0.384 + (-0.70656)) = 0.96 + 0.1 \cdot (-1.09056) = 0.850944 \)</p>
+            </div>
+
+            <div class="result">
+                <p><strong>Result:</strong> \( y(0.4) \approx 0.850944 \)</p>
+                <p class="text-sm">Exact solution: \( y = e^{-x^2} \) → \( y(0.4) = e^{-0.16} \approx 0.85214 \). Error ≈ 0.0012.</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- Calculator Button -->
+    <div class="center">
+        <a href="/calculator" class="btn">
+            Open Interactive Calculator
+        </a>
+    </div>
+
+</div>
+
+<script>
+    lucide.createIcons();
+
+    // Toggle example visibility
+    const exampleBtns = document.querySelectorAll('.example-btn');
+    const example1Div = document.getElementById('example-1');
+    const example2Div = document.getElementById('example-2');
+
+    function showExample(exampleId) {
+        // Hide both
+        example1Div.classList.remove('active');
+        example2Div.classList.remove('active');
+        // Remove active class from both buttons
+        exampleBtns.forEach(btn => btn.classList.remove('active'));
+        // Show selected
+        if (exampleId === 1) {
+            example1Div.classList.add('active');
+            exampleBtns[0].classList.add('active');
+        } else if (exampleId === 2) {
+            example2Div.classList.add('active');
+            exampleBtns[1].classList.add('active');
+        }
+    }
+
+    exampleBtns.forEach((btn, idx) => {
+        btn.addEventListener('click', () => {
+            showExample(idx + 1);
+        });
+    });
+
+    // Optionally show example 1 by default? (or none)
+    // showExample(1); // uncomment if you want example 1 shown initially
+</script>
+
+</body>
+</html>

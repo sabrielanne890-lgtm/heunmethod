@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heun's Method – Interactive Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #1a1a2e;
+            --surface: #16213e;
+            --text: #e8e8e8;
+            --accent: #e94560;
+            --secondary: #0f3460;
+            --border: #0f3460;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Crimson Pro', serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            padding: 2rem 1rem;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+        .card {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .input-group {
+            margin-bottom: 1rem;
+        }
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 0.3rem;
+            font-size: 0.9rem;
+        }
+        .input-group input {
+            width: 100%;
+            background-color: var(--secondary);
+            border: 1px solid var(--accent);
+            border-radius: 0.5rem;
+            padding: 0.6rem 1rem;
+            color: var(--text);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(233, 69, 96, 0.3);
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .btn {
+            background-color: var(--accent);
+            color: white;
+            font-weight: bold;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            width: 100%;
+        }
+        .btn:hover {
+            background-color: #d63a50;
+        }
+        .error {
+            background-color: rgba(220, 38, 38, 0.2);
+            border: 1px solid #dc2626;
+            color: #fca5a5;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            text-align: center;
+        }
+        .hidden {
+            display: none;
+        }
+        .table-wrapper {
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            color: var(--accent);
+            font-weight: 600;
+        }
+        tr:hover {
+            background-color: rgba(15, 52, 96, 0.5);
+        }
+        .step-detail {
+            background-color: var(--secondary);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--accent);
+        }
+        .step-detail h4 {
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+        }
+        .step-detail p {
+            margin: 0.5rem 0;
+        }
+        .formula-inline {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: var(--bg);
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.3rem;
+            display: inline-block;
+        }
+        .result-box {
+            background-color: var(--secondary);
+            border: 1px solid var(--accent);
+            border-radius: 0.75rem;
+            padding: 1rem;
+            text-align: center;
+            font-size: 1.1rem;
+            margin-top: 1rem;
+        }
+        .result-box strong {
+            color: var(--accent);
+        }
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 1rem;
+            color: var(--accent);
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+        .toggle-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .toggle-btn {
+            background-color: var(--secondary);
+            border: 1px solid var(--accent);
+            color: var(--text);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .toggle-btn.active {
+            background-color: var(--accent);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header class="header">
+        <h1>Heun's Method</h1>
+        <p>Interactive Calculator (Improved Euler) – Step‑by‑Step Solution</p>
+    </header>
+
+    <section class="card">
+        <div class="input-group">
+            <label>dy/dx = f(x, y)</label>
+            <input type="text" id="ode-input" value="x+y" placeholder="e.g., x+y, -2*x*y, sin(x)*y">
+            <p class="text-xs opacity-70 mt-1">Use x, y, +, -, *, /, ^, sin, cos, tan, exp, log, sqrt, abs</p>
+        </div>
+
+        <div class="grid">
+            <div class="input-group">
+                <label>x₀</label>
+                <input type="number" id="x0-input" value="0" step="any">
+            </div>
+            <div class="input-group">
+                <label>y₀</label>
+                <input type="number" id="y0-input" value="1" step="any">
+            </div>
+            <div class="input-group">
+                <label>Step size (h)</label>
+                <input type="number" id="step-input" value="0.1" step="0.01">
+            </div>
+            <div class="input-group">
+                <label>Number of steps</label>
+                <input type="number" id="steps-input" value="5" min="1" max="200">
+            </div>
+        </div>
+
+        <button id="calc-btn" class="btn">
+            <i data-lucide="play" class="w-5 h-5"></i> Calculate
+        </button>
+
+        <div id="error-msg" class="error hidden"></div>
+    </section>
+
+    <!-- Results section (hidden initially) -->
+    <section class="card hidden" id="results-container">
+        <div class="toggle-buttons">
+            <button id="show-table-btn" class="toggle-btn active">📊 Numeric Table</button>
+            <button id="show-steps-btn" class="toggle-btn">📝 Step‑by‑Step Explanation</button>
+        </div>
+
+        <!-- Numeric Table View -->
+        <div id="table-view">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Step</th><th>x</th><th>y</th><th>f(x,y)</th><th>ỹ (predictor)</th><th>f(x+h,ỹ)</th><th>y next (corrector)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="results-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Step-by-Step Explanation View -->
+        <div id="steps-view" class="hidden">
+            <div id="steps-details"></div>
+        </div>
+
+        <div class="result-box">
+            <strong id="final-result"></strong>
+        </div>
+    </section>
+
+    <div class="text-center mt-4">
+        <a href="/" class="back-link">← Back to theory and examples</a>
+    </div>
+</div>
+
+<script>
+    // Helper: safely evaluate mathematical expression
+    function evaluateExpression(expr, x, y) {
+        let processed = expr.replace(/\^/g, '**');
+        processed = processed.replace(/x/g, `(${x})`).replace(/y/g, `(${y})`);
+        try {
+            const fn = new Function('return (' + processed + ')');
+            const result = fn();
+            if (isFinite(result)) return result;
+            return null;
+        } catch(e) {
+            return null;
+        }
+    }
+
+    // Perform one Heun step
+    function heunStep(f, x, y, h) {
+        const f1 = f(x, y);
+        if (f1 === null) return null;
+        const yTilde = y + h * f1;
+        const xNext = x + h;
+        const f2 = f(xNext, yTilde);
+        if (f2 === null) return null;
+        const yNext = y + (h / 2) * (f1 + f2);
+        return { xNext, yNext, f1, yTilde, f2 };
+    }
+
+    // Format a number nicely for display
+    function fmt(num, decimals = 8) {
+        return Number(num).toFixed(decimals);
+    }
+
+    // Main calculation
+    document.addEventListener('DOMContentLoaded', () => {
+        const calcBtn = document.getElementById('calc-btn');
+        const odeInput = document.getElementById('ode-input');
+        const x0Input = document.getElementById('x0-input');
+        const y0Input = document.getElementById('y0-input');
+        const stepInput = document.getElementById('step-input');
+        const stepsInput = document.getElementById('steps-input');
+        const errorMsg = document.getElementById('error-msg');
+        const resultsContainer = document.getElementById('results-container');
+        const resultsBody = document.getElementById('results-body');
+        const stepsDetailsDiv = document.getElementById('steps-details');
+        const finalResultSpan = document.getElementById('final-result');
+
+        // Toggle between table and step-by-step views
+        const showTableBtn = document.getElementById('show-table-btn');
+        const showStepsBtn = document.getElementById('show-steps-btn');
+        const tableView = document.getElementById('table-view');
+        const stepsView = document.getElementById('steps-view');
+
+        showTableBtn.addEventListener('click', () => {
+            showTableBtn.classList.add('active');
+            showStepsBtn.classList.remove('active');
+            tableView.classList.remove('hidden');
+            stepsView.classList.add('hidden');
+        });
+
+        showStepsBtn.addEventListener('click', () => {
+            showStepsBtn.classList.add('active');
+            showTableBtn.classList.remove('active');
+            stepsView.classList.remove('hidden');
+            tableView.classList.add('hidden');
+        });
+
+        calcBtn.addEventListener('click', () => {
+            resultsContainer.classList.add('hidden');
+            errorMsg.classList.add('hidden');
+
+            const odeStr = odeInput.value.trim();
+            const x0 = parseFloat(x0Input.value);
+            const y0 = parseFloat(y0Input.value);
+            const h = parseFloat(stepInput.value);
+            const steps = parseInt(stepsInput.value, 10);
+
+            if (!odeStr) {
+                errorMsg.textContent = 'Please enter an ODE expression.';
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+            if (isNaN(x0) || isNaN(y0) || isNaN(h) || isNaN(steps)) {
+                errorMsg.textContent = 'All fields must contain valid numbers.';
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+            if (h <= 0) {
+                errorMsg.textContent = 'Step size must be positive.';
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+            if (steps < 1 || steps > 200) {
+                errorMsg.textContent = 'Number of steps must be between 1 and 200.';
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            const f = (xVal, yVal) => evaluateExpression(odeStr, xVal, yVal);
+
+            let x = x0;
+            let y = y0;
+            const rows = [];
+
+            for (let i = 0; i < steps; i++) {
+                const stepResult = heunStep(f, x, y, h);
+                if (stepResult === null) {
+                    errorMsg.textContent = 'Error evaluating ODE. Check syntax (only x, y, +, -, *, /, ^, sin, cos, tan, exp, log, sqrt, abs allowed).';
+                    errorMsg.classList.remove('hidden');
+                    return;
+                }
+                rows.push({
+                    step: i,
+                    x: x,
+                    y: y,
+                    f1: stepResult.f1,
+                    yTilde: stepResult.yTilde,
+                    f2: stepResult.f2,
+                    yNext: stepResult.yNext,
+                    xNext: stepResult.xNext,
+                    h: h
+                });
+                x = stepResult.xNext;
+                y = stepResult.yNext;
+            }
+
+            // Populate numeric table
+            resultsBody.innerHTML = '';
+            for (const row of rows) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="mono">${row.step}</td>
+                    <td class="mono">${fmt(row.x, 6)}</td>
+                    <td class="mono">${fmt(row.y, 8)}</td>
+                    <td class="mono">${fmt(row.f1, 8)}</td>
+                    <td class="mono">${fmt(row.yTilde, 8)}</td>
+                    <td class="mono">${fmt(row.f2, 8)}</td>
+                    <td class="mono">${fmt(row.yNext, 8)}</td>
+                `;
+                resultsBody.appendChild(tr);
+            }
+
+            // Generate step-by-step explanation
+            stepsDetailsDiv.innerHTML = '';
+            for (const row of rows) {
+                const stepDiv = document.createElement('div');
+                stepDiv.className = 'step-detail';
+                stepDiv.innerHTML = `
+                    <h4>Step ${row.step + 1}: from x = ${fmt(row.x, 4)} to x = ${fmt(row.xNext, 4)}</h4>
+                    <p><strong>Predictor (Euler step):</strong><br>
+                    ỹ = y + h·f(x, y)<br>
+                    = ${fmt(row.y, 8)} + ${row.h} · (${fmt(row.f1, 8)})<br>
+                    = ${fmt(row.yTilde, 8)}</p>
+                    
+                    <p><strong>Slope at the predicted point:</strong><br>
+                    f(x+h, ỹ) = ${fmt(row.f2, 8)}</p>
+                    
+                    <p><strong>Corrector (average slope):</strong><br>
+                    yₙₑₓₜ = y + (h/2)·[f(x,y) + f(x+h,ỹ)]<br>
+                    = ${fmt(row.y, 8)} + (${row.h}/2)·(${fmt(row.f1, 8)} + ${fmt(row.f2, 8)})<br>
+                    = ${fmt(row.y, 8)} + ${fmt(row.h/2, 6)} · (${fmt(row.f1 + row.f2, 8)})<br>
+                    = ${fmt(row.yNext, 8)}</p>
+                    
+                    <p><strong>⇒ y(${fmt(row.xNext, 4)}) ≈ ${fmt(row.yNext, 8)}</strong></p>
+                    <hr style="border-color: var(--border); margin: 0.5rem 0;">
+                `;
+                stepsDetailsDiv.appendChild(stepDiv);
+            }
+
+            finalResultSpan.textContent = `y(${fmt(x, 6)}) ≈ ${fmt(y, 10)}`;
+            resultsContainer.classList.remove('hidden');
+            
+            // Default to table view
+            showTableBtn.click();
+        });
+
+        // Enter key support
+        const stepsInputElem = document.getElementById('steps-input');
+        stepsInputElem.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') calcBtn.click();
+        });
+    });
+
+    lucide.createIcons();
+</script>
+</body>
+</html>
